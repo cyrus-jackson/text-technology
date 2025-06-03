@@ -1,0 +1,4 @@
+google-generativeai
+redis[hiredis]
+psycopg2-binary
+newsapi-python
