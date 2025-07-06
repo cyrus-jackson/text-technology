@@ -1,12 +1,6 @@
-.vercel
 *.log
 *.pyc
 __pycache__
-<<<<<<< Updated upstream
-
-=======
-Runners
->>>>>>> Stashed changes
 
 # Environments 
 .env*
