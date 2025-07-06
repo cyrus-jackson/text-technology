@@ -1,0 +1,38 @@
+name: Fetch Fuel Prices
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+  schedule:
+    # Every day at 6:00 UTC
+    - cron:  '0 6 * * *'
+
+jobs:
+  fetch-and-upload:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Check out the code
+      - uses: actions/checkout@v4
+
+      # 2. Set up Python 3.x
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests lxml google-cloud-firestore google-auth
+
+      - name: Authenticate to GCP
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        run: |
+          echo "$GCP_SA_KEY" > credentials.json
+
+      - name: Fetch and upload fuel prices
+        run: |
+          python Runners/germany_stats/firebase_runner.py
