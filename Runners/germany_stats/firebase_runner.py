@@ -18,7 +18,7 @@ GERMAN_TIMEZONE = ZoneInfo('Europe/Berlin')
 today = datetime.now(GERMAN_TIMEZONE).replace(hour=0, minute=0, second=0, microsecond=0)
 today_ms = int(today.timestamp() * 1000)
 tomorrow_ms = today_ms + 86400000
-# yesterday_ms = today_ms - 86400000
+yesterday_ms = today_ms - 86400000
 
 def copy_data_to_firestore(json_data, collection_name):
 
@@ -94,7 +94,6 @@ def fetch_and_parse_electricity_prices():
             processed_data_dict["day_ahead_price"] = price_eur_mwh
             break
 
-    print(f"Processed data points for tomorrow. Result: {processed_data_dict}")
     return processed_data_dict
 
 def fetch_and_parse_electricity_forecast():
@@ -109,12 +108,38 @@ def fetch_and_parse_electricity_forecast():
     for point in scraped_data:
         timestamp_ms, grid_load_MWh = point
 
-        if tomorrow_ms == timestamp_ms:
+        if today_ms == timestamp_ms:
             processed_data_dict["consumption_forecast"] = grid_load_MWh
             break
 
-    print(f"Processed elec forecast for tomorrow. Result: {processed_data_dict}")
     return processed_data_dict
+
+def fetch_and_parse_electricity_consumption():
+    url = f"https://www.smard.de/app/chart_data/410/DE/410_DE_day_1735686000000.json"
+    response = requests.get(url)
+    response.raise_for_status()
+    data = response.json()
+    scraped_data = data.get('series', [])
+
+    processed_data_dict = {}
+
+    for point in scraped_data:
+        timestamp_ms, grid_load_MWh = point
+
+        if yesterday_ms == timestamp_ms:
+            processed_data_dict["consumption"] = grid_load_MWh
+            break
+
+    return processed_data_dict
+
+def update_yesterdays_document(json_data, collection_name):
+    credentials = service_account.Credentials.from_service_account_file("credentials.json")
+    db = firestore.Client(credentials=credentials)
+
+    yesterdays_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+
+    doc_ref = db.collection(collection_name).document(yesterdays_date)
+    doc_ref.update(json_data)
 
 if __name__ == '__main__':
     fuel_prices = retry_logic(3, 5, fetch_and_parse_fuel_prices)
@@ -122,9 +147,10 @@ if __name__ == '__main__':
     copy_data_to_firestore(fuel_prices, "fuel_prices")
 
     electricity_prices = retry_logic(3, 5, fetch_and_parse_electricity_prices)
-    # consumption = retry_logic(3, 5, fetch_and_parse_electricity_consumption)
+    consumption = retry_logic(3, 5, fetch_and_parse_electricity_consumption)
     forecast_consumption = retry_logic(3, 5, fetch_and_parse_electricity_forecast)
 
     copy_data_to_firestore(electricity_prices | forecast_consumption, 'electricity')
+    update_yesterdays_document(consumption, 'electricity')
     # for fuel, val in prices.items():
     #     print(f"{fuel}: € {val:.3f}")
