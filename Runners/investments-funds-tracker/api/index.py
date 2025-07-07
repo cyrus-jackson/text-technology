@@ -9,6 +9,7 @@ from utils.redis_db import has_processed_link, mark_link_as_processed
 
 from utils.config import CRON_SECRET
 
+import outputformat as ouf
 
 class handler(BaseHTTPRequestHandler):
 
@@ -36,24 +37,32 @@ class handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """Handle the GET request."""
-        if not self.check_authorization():
-            return  # Early exit if authorization fails
+        print("Hi")
+        # if not self.check_authorization():
+        #     return  # Early exit if authorization fails
 
         try:
             count = 0
-            COUNT_TO_EXIT = 3
+            COUNT_TO_EXIT = 1000
             all_data = []
             news_urls = []
+            error_links = []
             return_data = {'error' : False, 'message': 'Done', 'data': all_data, 'news_urls': news_urls}
 
             news_urls = get_today_news_urls()
-            if (news_urls is None) or (len(news_urls) <= 0):
+            total_len = len(news_urls)
+            bar_count = 0
+            print("Total Fetched URLs: " + str(total_len))
+            
+            if (news_urls is None) or (total_len <= 0):
                 return_data['error'] = True
                 return_data['message'] = "news_urls is None or 0. Check Logs"
 
             news_urls.reverse()
 
             for news_url in news_urls:
+                print("Processing: " + news_url)
+                bar_count = bar_count + 1
                 
                 if has_processed_link(news_url):
                     print("Link is already processed: " + news_url)
@@ -63,24 +72,35 @@ class handler(BaseHTTPRequestHandler):
                 if ai_parsed_dict is None:
                     return_data['error'] = True
                     return_data['message'] = "ai_parsed_dict is None. Check Logs"
-                    break                    
-
+                    error_links.append(news_url)
+                    # break                    
+                insert_data = True
                 if ai_parsed_dict["funding_related"]:
-                    insert_investment_data(ai_parsed_dict)
+                    print("Trying to insert: " + news_url)
+                    try:
+                        insert_data = insert_investment_data(ai_parsed_dict)
+                    except Exception as inner_e:
+                        print(inner_e)
+
                 all_data.append(ai_parsed_dict)
-                
-                mark_link_as_processed(news_url)
+                if insert_data:
+                    mark_link_as_processed(news_url)
 
                 # Exit to slowly process the information
                 if count == COUNT_TO_EXIT:
                     break
                 else:
                     count = count + 1
-                time.sleep(2)
+                ouf.bar(bar_count, total_len)
+                time.sleep(2.5)
+            print("Got: " + str(len(news_urls)))
             # Send the successful response
             return_data['data'] = all_data
             return_data['news_urls'] = news_urls
-            self.send_response_with_data(200, 'application/json', json.dumps(return_data))
+            if return_data['error']:
+                self.send_error_response(500, 'application/json', json.dumps(return_data))
+            else:
+                self.send_response_with_data(200, 'application/json', json.dumps(return_data))
 
         except Exception as e:
             # Handle any errors

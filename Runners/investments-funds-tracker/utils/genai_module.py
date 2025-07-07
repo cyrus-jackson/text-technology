@@ -29,13 +29,13 @@ class Investment(typing.TypedDict):
 
 
 def get_investment_info(link):
-    model = genai.GenerativeModel("gemini-2.0-flash-001")
+    model = genai.GenerativeModel("gemini-2.5-flash-preview-05-20")
     try:
         result = model.generate_content(
-            "Using the Link, please fill the data in this format in JSON mode. Only do this if the news article has information about investments or funding related news about only Germany. Handle the error case with the variable funding_related in JSON that it is not funding related. Also, handle the plan to fund article with right variable(Potential, Allocated, Planned, Undefined). If there is no mention of investment amount then mention Amount as 0. If there is no mention of jobs count, then mention JobsCount as 0. If any of the variables are not clear such as investment is not part of Germany, mention it in a variable notes and that it needs verification in needs_verification (boolean) and add a short summary of about 40 characters. Link:"+link,
+            "You are an expert at extracting and structuring information about investments and funding from news articles specifically for Germany. Your task is to analyze the provided news article link and extract relevant data into a JSON object following the specified schema. Here's the schema you must adhere to: import enum import typing class FUNDINGSTATUS(enum.Enum): Potential = \"Potential\" Allocated = \"Allocated\" Planned = \"Planned\" Undefined = \"Undefined\" class Investment(typing.TypedDict): Link: str Place: list[str] NewsArticleDate: str Amount: int JobsCount: int fundingrelated: bool fundingstatus: FUNDINGSTATUS notes: str needsverification: bool summary: str Instructions 1. Analyze the provided Link: Read the news article thoroughly. 2. Germany-Specific Focus: Only process the article if it contains information about investments or funding related to Germany. If not, set fundingrelated to false and provide a brief summary indicating why it's not relevant. 3. fundingrelated: Set to true if the article discusses investments or funding; otherwise, set to false. 4. fundingstatus: - Set to FUNDINGSTATUS.Allocated if the funding is confirmed and already provided. - Set to FUNDINGSTATUS.Planned if the article mentions a plan to fund or an upcoming investment. - Set to FUNDINGSTATUS.Potential if the funding is still under consideration or highly speculative. - Set to FUNDINGSTATUS.Undefined if the funding status is unclear or not explicitly stated. 5. Amount: - Extract any mention of investment budget or loan amounts. - If multiple amounts are mentioned and clearly distinct (e.g., different stages of funding), try to identify the most significant or latest one. If ambiguous, mention the ambiguity in notes. - If no specific amount is mentioned, set to 0. 6. JobsCount: - Extract the number of jobs created or impacted by the investment. - If no specific job count is mentioned, set to 0. 7. Place: - Identify specific German cities, regions, or states mentioned as beneficiaries or locations of the investment. Provide as a list of strings (e.g., [Berlin, Bavaria]). - If the exact place in Germany is not clear, leave it empty or indicate Germany if that's the only level of detail. 8. NewsArticleDate: Extract the publication date of the news article in YYYYMMDD format. 9. notes: Use this field for any ambiguities, clarifications, or additional context. 10. needsverification: Set to true if any crucial information like the German connection, exact amount, or specific location is unclear or needs further confirmation. Otherwise, set to false. 11. summary: Provide a concise summary of the article (approximately 250 characters long) highlighting the key investment details or the reason it's not fundingrelated. Example Input { Link: https://www.example.com/news/german-tech-startup-secures-series-a-funding } Your Turn Given the Link: "+ link +" Please provide the JSON output.",
             generation_config=genai.GenerationConfig(
                 response_mime_type="application/json",
-                response_schema=Investment  # Correct schema according to the library's expectation
+                response_schema=Investment  
             ),
         )
     except Exception as e:
@@ -60,6 +60,7 @@ def get_investment_info(link):
         
         # Parse the JSON string
         inner_data = json.loads(inner_json_str)
+        print(inner_data)
 
     except (json.JSONDecodeError, KeyError, IndexError) as e:
         print(f"Error parsing response JSON: {e}")

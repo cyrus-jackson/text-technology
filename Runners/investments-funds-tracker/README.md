@@ -1,23 +1,91 @@
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fexamples%2Ftree%2Fmain%2Fpython%2Fhello-world&demo-title=Python%20Hello%20World&demo-description=Use%20Python%20on%20Vercel%20with%20Serverless%20Functions%20using%20the%20Python%20Runtime.&demo-url=https%3A%2F%2Fpython-hello-world.vercel.app%2F&demo-image=https://assets.vercel.com/image/upload/v1669994600/random/python.png)
 
-# Python Hello World
+# Investments Funds Tracker
 
-This example shows how to use Python on Vercel with Serverless Functions using the [Python Runtime](https://vercel.com/docs/concepts/functions/serverless-functions/runtimes/python).
+A Python-based system for tracking, extracting, and storing information about investments and funding from news articles related to Germany. The project uses Google Gemini for AI-powered information extraction, PostgreSQL for storage, Redis for deduplication, and supports deployment on Vercel as a serverless API.
 
-## Demo
+## Features
 
-https://python-hello-world.vercel.app/
+- Fetches news articles about investments in Germany using MediaStack and NewsAPI.
+- Uses Google Gemini to extract structured investment data from news articles.
+- Stores extracted data in a PostgreSQL database.
+- Deduplicates processed links using Redis.
+- Exposes an HTTP API for batch processing and data retrieval.
+- Can be run locally or deployed to Vercel with scheduled cron jobs.
 
-## Running Locally
+## Project Structure
 
-```bash
-npm i -g vercel
-vercel dev
+```
+.
+├── api/
+│   └── index.py           # Main API handler
+├── utils/
+│   ├── config.py          # Configuration and environment variables
+│   ├── db.py              # Database operations (PostgreSQL)
+│   ├── genai_module.py    # Google Gemini integration
+│   ├── news_module.py     # News fetching logic
+│   └── redis_db.py        # Redis deduplication logic
+├── run_server.py          # Local HTTP server entrypoint
+├── watch_server.py        # (Optional) Watchdog for development
+├── requirements.txt       # Python dependencies
+├── vercel.json            # Vercel deployment config
+└── README.md
 ```
 
-Your Python API is now available at `http://localhost:3000/api`.
+## Setup
 
-## Local Development
-Install all the requirments using `pip install -r requirements.txt` from `/api` folder
-Install watchdog using `pip install watchdog` and run `python watch_server.py`
+### 1. Clone the Repository
+
+```bash
+git clone <repo-url>
+cd investments-funds-tracker
+```
+
+### 2. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Environment Variables
+
+Create a `.env` file or set the following environment variables:
+
+- `GEMINI_KEY` – Google Gemini API key
+- `POSTGRES_URL` – PostgreSQL connection string
+- `REDIS_URL` – Redis connection string
+- `NEWS_KEY` – NewsAPI key
+- `MEDIASTACK_KEY` – MediaStack API key
+- `CRON_SECRET` – (Optional) Secret for cron authorization
+
+### 4. Running Locally
+
+Start the HTTP server:
+
+```bash
+python run_server.py
+```
+
+The API will be available at `http://localhost:8008/`.
+
+### 5. Development Tools
+
+For auto-reloading during development, install watchdog:
+
+```bash
+pip install watchdog
+python watch_server.py
+```
+
+## Deployment
+
+This project is ready for deployment on [Vercel](https://vercel.com/):
+
+- The API is served from [`api/index.py`](api/index.py).
+- Scheduled jobs are configured in [`vercel.json`](vercel.json).
+
+## Usage
+
+- The main endpoint fetches news, processes them with Gemini, and stores results in the database.
+- Processed links are tracked in Redis to avoid duplication.
+
 
