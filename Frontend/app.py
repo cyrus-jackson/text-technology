@@ -96,7 +96,6 @@ def places():
         e = etree.SubElement(root, 'place')
         e.text = pl
     xml = etree.tostring(root, xml_declaration=True, encoding='UTF-8')
-    print(xml)
     return Response(xml, mimetype='application/xml')
 
 if __name__ == '__main__':
