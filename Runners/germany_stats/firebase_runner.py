@@ -125,6 +125,6 @@ if __name__ == '__main__':
     # consumption = retry_logic(3, 5, fetch_and_parse_electricity_consumption)
     forecast_consumption = retry_logic(3, 5, fetch_and_parse_electricity_forecast)
 
-    store_data_using_general_function(db, electricity_prices | forecast_consumption, 'electricity')
+    copy_data_to_firestore(db, electricity_prices | forecast_consumption, 'electricity')
     # for fuel, val in prices.items():
     #     print(f"{fuel}: € {val:.3f}")
