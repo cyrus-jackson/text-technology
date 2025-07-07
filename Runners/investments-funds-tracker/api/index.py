@@ -37,7 +37,7 @@ class handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """Handle the GET request."""
-        print("Hi")
+        # print("Hi")
         # if not self.check_authorization():
         #     return  # Early exit if authorization fails
 
@@ -53,7 +53,7 @@ class handler(BaseHTTPRequestHandler):
             total_len = len(news_urls)
             bar_count = 0
             print("Total Fetched URLs: " + str(total_len))
-            
+
             if (news_urls is None) or (total_len <= 0):
                 return_data['error'] = True
                 return_data['message'] = "news_urls is None or 0. Check Logs"
@@ -63,7 +63,7 @@ class handler(BaseHTTPRequestHandler):
             for news_url in news_urls:
                 print("Processing: " + news_url)
                 bar_count = bar_count + 1
-                
+
                 if has_processed_link(news_url):
                     print("Link is already processed: " + news_url)
                     continue
@@ -73,7 +73,7 @@ class handler(BaseHTTPRequestHandler):
                     return_data['error'] = True
                     return_data['message'] = "ai_parsed_dict is None. Check Logs"
                     error_links.append(news_url)
-                    # break                    
+                    # break
                 insert_data = True
                 if ai_parsed_dict["funding_related"]:
                     print("Trying to insert: " + news_url)
