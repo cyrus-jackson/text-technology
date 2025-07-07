@@ -14,6 +14,7 @@ logging.basicConfig(level=logging.INFO)
 todays_date = str(datetime.now().strftime("%Y-%m-%d"))
 now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+GERMAN_TIMEZONE = ZoneInfo('Europe/Berlin')
 today = datetime.now(GERMAN_TIMEZONE).replace(hour=0, minute=0, second=0, microsecond=0)
 today_ms = int(today.timestamp() * 1000)
 tomorrow_ms = today_ms + 86400000
