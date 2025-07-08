@@ -5,9 +5,11 @@ logging.basicConfig(level=logging.DEBUG)
 from flask import Flask, request, Response
 import psycopg2
 import os
+import json
+import base64
 from lxml import etree
 import api.cache_db as cache
-from utils.config import DATABASE_URL
+from utils.config import DATABASE_URL, FIREBASE_CRED
 import re
 import xml.etree.ElementTree as ET
 from google.oauth2 import service_account
@@ -22,6 +24,8 @@ if not DATABASE_URL:
 
 def get_connection():
     return psycopg2.connect(DATABASE_URL)
+
+creds_dict = json.loads(base64.b64decode(FIREBASE_CRED))
 
 # Fetch investments
 def fetch_investments(place=None):
@@ -82,7 +86,8 @@ def sanitize_field_name(name):
     return name
 
 def build_firestore_xml():
-    credentials = service_account.Credentials.from_service_account_file("credentials.json")
+    credentials = service_account.Credentials.from_service_account_info(creds_dict)
+    # credentials = service_account.Credentials.from_service_account_file("credentials.json")
     db = firestore.Client(credentials=credentials)
 
     root = ET.Element("germany_stats")
