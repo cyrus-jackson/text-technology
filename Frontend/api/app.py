@@ -12,8 +12,8 @@ import api.cache_db as cache
 from utils.config import DATABASE_URL, FIREBASE_CRED
 import re
 import xml.etree.ElementTree as ET
-from google.oauth2 import service_account
-from google.cloud import firestore
+import firebase_admin
+from firebase_admin import credentials
 
 # Flask app
 app = Flask(__name__)
