@@ -8,4 +8,4 @@ today = datetime.now()
 DATE_TODAY = str(today.strftime("%Y-%m-%d"))
 
 
-FIREBASE_CRED = os.getenv("FIREBASE_CREDENTIALS_BASE64")
+FIREBASE_CRED = os.getenv("FIREBASE_CRED")

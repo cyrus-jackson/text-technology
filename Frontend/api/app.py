@@ -12,8 +12,8 @@ import api.cache_db as cache
 from utils.config import DATABASE_URL, FIREBASE_CRED
 import re
 import xml.etree.ElementTree as ET
-import firebase_admin
-from firebase_admin import credentials
+from google.oauth2 import service_account
+from google.cloud import firestore
 
 # Flask app
 app = Flask(__name__)
@@ -87,7 +87,6 @@ def sanitize_field_name(name):
 
 def build_firestore_xml():
     credentials = service_account.Credentials.from_service_account_info(creds_dict)
-    # credentials = service_account.Credentials.from_service_account_file("credentials.json")
     db = firestore.Client(credentials=credentials)
 
     root = ET.Element("germany_stats")
