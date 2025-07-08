@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   schedule:
     # Every day at 6:00 UTC
-    - cron:  '0 6 * * *'
+    - cron:  '0 14 * * *'
 
 jobs:
   fetch-and-upload:
