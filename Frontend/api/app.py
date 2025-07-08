@@ -111,26 +111,24 @@ def build_firestore_xml():
 def index():
     logging.info("Received request for index")
 
-    firestore_xml = build_firestore_xml()
-    firestore_html = transform(firestore_xml, 'xslt/stats.xsl')
-
-    html = cache.get_data()
-    if html:
+    combined = cache.get_data()
+    if combined:
         logging.info("Using cached HTML")
     else:
         rows = fetch_investments()
         xml = build_xml(rows)
         html = transform(xml, 'xslt/index.xslt')
-        if html is None:
+        firestore_xml = build_firestore_xml()
+        firestore_html = transform(firestore_xml, 'xslt/stats.xsl')
+        if (html is None) or (firestore_html is None):
             return Response("Internal Server Error (XSLT failure)", status=500)
-        cache.set_data(html)
+        combined = firestore_html + "<hr/>" + html
+        cache.set_data(combined)
 
     # Ensure it's a UTF-8 string
-    if isinstance(firestore_html, bytes):
-        firestore_html = firestore_html.decode('utf-8')
-    if isinstance(html, bytes):
-        html = html.decode('utf-8')
-    combined = firestore_html + "<hr/>" + html
+    if isinstance(combined, bytes):
+        combined = combined.decode('utf-8')
+
     return Response(combined, mimetype='text/html')
 
 @app.route('/report')
