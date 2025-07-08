@@ -122,6 +122,12 @@ def index():
         firestore_html = transform(firestore_xml, 'xslt/stats.xsl')
         if (html is None) or (firestore_html is None):
             return Response("Internal Server Error (XSLT failure)", status=500)
+
+        if isinstance(html, bytes):
+            html = html.decode('utf-8')
+        if isinstance(firestore_html, bytes):
+            firestore_html = firestore_html.decode('utf-8')
+
         combined = firestore_html + "<hr/>" + html
         cache.set_data(combined)
 
