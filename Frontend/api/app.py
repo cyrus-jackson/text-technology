@@ -111,7 +111,8 @@ def build_firestore_xml():
 def index():
     logging.info("Received request for index")
 
-    combined = cache.get_data()
+    # combined = cache.get_data()
+    combined = None
     if combined:
         logging.info("Using cached HTML")
     else:

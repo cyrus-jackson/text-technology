@@ -5,65 +5,130 @@
   <xsl:output method="html" indent="yes"/>
 
   <xsl:template match="/">
-    <html>
+    <html lang="en">
       <head>
-        <title>Firestore Data Display</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          h2 { margin-top: 40px; }
-          table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-          th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-          th { background-color: #eee; }
-        </style>
+        <meta charset="UTF-8"/>
+        <title>Germany Investments and Stats</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
       </head>
-      <body>
+      <body class="bg-light">
+        <div class="container py-5">
+          <h1 class="mb-4">⚡ Electricity Prices</h1>
 
-        <!-- ELECTRICITY TABLE -->
-        <h2>Electricity Data</h2>
-        <table>
-          <tr>
-            <th>Date</th>
-            <th>Today Price</th>
-            <th>Consumption</th>
-            <th>Day Ahead Price</th>
-            <th>Consumption Forecast</th>
-          </tr>
-          <xsl:for-each select="germany_stats/electricity/document">
-            <tr>
-              <td><xsl:value-of select="@id"/></td>
-              <td><xsl:value-of select="today_price"/></td>
-              <td><xsl:value-of select="consumption"/></td>
-              <td><xsl:value-of select="day_ahead_price"/></td>
-              <td><xsl:value-of select="consumption_forecast"/></td>
-            </tr>
-          </xsl:for-each>
-        </table>
+          <!-- Latest Electricity Card -->
+          <xsl:variable name="latestElec" select="germany_stats/electricity/document[1]"/>
+          <div class="row mb-5">
+            <div class="col-md-6 col-lg-3">
+              <div class="card text-bg-light border-primary shadow-sm">
+                <div class="card-body">
+                  <h6 class="card-title text-primary">Today Price</h6>
+                  <p class="card-text fs-5"><xsl:value-of select="$latestElec/today_price"/></p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="card text-bg-light border-success shadow-sm">
+                <div class="card-body">
+                  <h6 class="card-title text-success">Consumption</h6>
+                  <p class="card-text fs-5"><xsl:value-of select="$latestElec/consumption"/></p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="card text-bg-light border-warning shadow-sm">
+                <div class="card-body">
+                  <h6 class="card-title text-warning">Day Ahead Price</h6>
+                  <p class="card-text fs-5"><xsl:value-of select="$latestElec/day_ahead_price"/></p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="card text-bg-light border-info shadow-sm">
+                <div class="card-body">
+                  <h6 class="card-title text-info">Forecast</h6>
+                  <p class="card-text fs-5"><xsl:value-of select="$latestElec/consumption_forecast"/></p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <!-- FUEL PRICES TABLE -->
-        <h2>Fuel Prices</h2>
-        <table>
-          <tr>
-            <th>Date</th>
-            <th>Benzine 95-E10</th>
-            <th>Diesel</th>
-            <th>LPG</th>
-						<th>Premium 98</th>
-						<th>Super 95</th>
-          </tr>
+          <!-- Electricity Table -->
+          <h3 class="mb-3">📈 Electricity Stats</h3>
+          <div class="table-responsive mb-5">
+            <table class="table table-bordered table-striped table-hover table-sm">
+              <thead class="table-secondary">
+                <tr>
+                  <th>Date</th>
+                  <th>Today Price</th>
+                  <th>Consumption</th>
+                  <th>Day Ahead Price</th>
+                  <th>Forecast</th>
+                </tr>
+              </thead>
+              <tbody>
+                <xsl:for-each select="germany_stats/electricity/document">
+                  <tr>
+                    <td><xsl:value-of select="@id"/></td>
+                    <td><xsl:value-of select="today_price"/></td>
+                    <td><xsl:value-of select="consumption"/></td>
+                    <td><xsl:value-of select="day_ahead_price"/></td>
+                    <td><xsl:value-of select="consumption_forecast"/></td>
+                  </tr>
+                </xsl:for-each>
+              </tbody>
+            </table>
+          </div>
 
-          <xsl:for-each select="germany_stats/fuel_prices/document">
-            <tr>
-              <td><xsl:value-of select="@id"/></td>
-              <!-- Loop through all child elements -->
-              <xsl:for-each select="*">
-                <td><xsl:value-of select="."/></td>
-              </xsl:for-each>
-            </tr>
-          </xsl:for-each>
-        </table>
+          <!-- Latest Fuel Prices Card -->
+          <xsl:variable name="latestFuel" select="germany_stats/fuel_prices/document[1]"/>
+          <div class="row mb-4">
+            <div class="col-12">
+              <h3>⛽ Latest Fuel Prices Summary</h3>
+            </div>
+            <xsl:for-each select="$latestFuel/*">
+              <div class="col-6 col-md-4 col-lg-2 mb-3">
+                <div class="card text-bg-light border-secondary shadow-sm">
+                  <div class="card-body text-center">
+                    <h6 class="card-title text-secondary">
+                      <xsl:value-of select="name()"/>
+                    </h6>
+                    <p class="card-text fs-5">
+                      <xsl:value-of select="."/>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </xsl:for-each>
+          </div>
 
+          <!-- Fuel Prices Table -->
+          <h3 class="mb-3">⛽ Fuel Prices</h3>
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover table-sm">
+              <thead class="table-secondary">
+                <tr>
+                  <th>Date</th>
+                  <th>Benzine 95-E10</th>
+                  <th>Diesel</th>
+                  <th>LPG</th>
+                  <th>Premium 98</th>
+                  <th>Super 95</th>
+                </tr>
+              </thead>
+              <tbody>
+                <xsl:for-each select="germany_stats/fuel_prices/document">
+                  <tr>
+                    <td><xsl:value-of select="@id"/></td>
+                    <xsl:for-each select="*">
+                      <td><xsl:value-of select="."/></td>
+                    </xsl:for-each>
+                  </tr>
+                </xsl:for-each>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </body>
     </html>
   </xsl:template>
-
 </xsl:stylesheet>
