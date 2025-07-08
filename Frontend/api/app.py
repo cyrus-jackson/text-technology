@@ -8,7 +8,10 @@ import os
 from lxml import etree
 import api.cache_db as cache
 from utils.config import DATABASE_URL
-
+import re
+import xml.etree.ElementTree as ET
+from google.oauth2 import service_account
+from google.cloud import firestore
 
 # Flask app
 app = Flask(__name__)
@@ -72,9 +75,40 @@ def transform(xml_data, xslt_path):
         logging.error(f"XSLT transformation failed: {e}")
         return None
 
+def sanitize_field_name(name):
+    name = re.sub(r"[^\w]", "_", name)
+    if re.match(r"^\d", name):
+        name = "_" + name
+    return name
+
+def build_firestore_xml():
+    credentials = service_account.Credentials.from_service_account_file("credentials.json")
+    db = firestore.Client(credentials=credentials)
+
+    root = ET.Element("germany_stats")
+
+    electricity_elem = ET.SubElement(root, "electricity")
+    for doc in db.collection("electricity").stream():
+        rec = ET.SubElement(electricity_elem, "document", id=doc.id)
+        for key, value in doc.to_dict().items():
+            tag = sanitize_field_name(key)
+            ET.SubElement(rec, tag).text = str(value)
+
+    fuel_elem = ET.SubElement(root, "fuel_prices")
+    for doc in db.collection("fuel_prices").stream():
+        rec = ET.SubElement(fuel_elem, "document", id=doc.id)
+        for key, value in doc.to_dict().items():
+            tag = sanitize_field_name(key)
+            ET.SubElement(rec, tag).text = str(value)
+
+    return ET.tostring(root, encoding="utf-8", xml_declaration=True)
+
 @app.route('/')
 def index():
     logging.info("Received request for index")
+
+    firestore_xml = build_firestore_xml()
+    firestore_html = transform(firestore_xml, 'xslt/stats.xsl')
 
     html = cache.get_data()
     if html:
@@ -88,9 +122,12 @@ def index():
         cache.set_data(html)
 
     # Ensure it's a UTF-8 string
+    if isinstance(firestore_html, bytes):
+        firestore_html = firestore_html.decode('utf-8')
     if isinstance(html, bytes):
         html = html.decode('utf-8')
-    return Response(html, mimetype='text/html')
+    combined = firestore_html + "<hr/>" + html
+    return Response(combined, mimetype='text/html')
 
 @app.route('/report')
 def report():
