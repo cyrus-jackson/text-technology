@@ -50,18 +50,18 @@
         ]]></script>
       </head>
       <body>
-		<header class="py-3">
-			<div class="container d-flex justify-content-between align-items-center">
-			<div>
-			<h1 class="project-title mb-0">Germany Stats and Investments from News Articles</h1>
-			<div class="subtitle">Text Technology Coursework</div>
-			</div>
-			<div class="contributors d-flex">
-			<span>Cyrus Dhara</span>
-			<span>Dwarkesh Patel</span>
-			</div>
-			</div>
-		</header>
+				<header class="py-3">
+					<div class="container d-flex justify-content-between align-items-center">
+						<div>
+							<h1 class="project-title mb-0">Germany Stats and Investments from News Articles</h1>
+							<div class="subtitle">Text Technology Coursework</div>
+						</div>
+						<div class="contributors d-flex">
+							<span>Cyrus Dhara</span>
+							<span>Dwarkesh Patel</span>
+						</div>
+					</div>
+				</header>
         <div class="container-fluid">
           <div class="row">
             <nav id="sidebar" class="col-md-3 col-lg-2">
