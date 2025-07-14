@@ -1,8 +1,7 @@
-# .github/workflows/cron_job.yml
 name: Daily Investment
 
 on:
-  workflow_dispatch: # Allows manual trigger from GitHub UI
+  workflow_dispatch:
   # schedule:
   #   - cron: '0 0 * * *' # Uncomment to run daily at midnight UTC
 
