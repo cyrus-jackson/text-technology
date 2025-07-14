@@ -9,7 +9,7 @@ SERVER_HOST = '127.0.0.1'
 SERVER_PORT = 8008
 SERVER_URL = f"http://{SERVER_HOST}:{SERVER_PORT}/"
 
-RUN_SERVER_SCRIPT = 'run_server.py'
+RUN_SERVER_SCRIPT = './run_server.py'
 
 def run_job():
     server_process = None
