@@ -28,25 +28,35 @@ def get_connection():
 creds_dict = json.loads(base64.b64decode(FIREBASE_CRED))
 
 # Fetch investments
-def fetch_investments(place=None, limit=None):
+def fetch_investments(place=None, funding_status=None, limit=None):
     base_query = (
         "SELECT * "
         "FROM investments"
     )
     params = []
+    conditions = []
+
     if place:
-        base_query += " WHERE place = %s"
+        conditions.append("place = %s")
         params.append(place)
-    base_query += " ORDER BY news_article_date DESC"
+
+    if funding_status: # Add condition for funding_status
+        conditions.append("funding_status = %s")
+        params.append(funding_status)
+
+    if conditions: # If there are any conditions, add WHERE clause
+        base_query += " WHERE " + " AND ".join(conditions)
+
+    base_query += " ORDER BY inserted_date DESC"
     if limit:
-        base_query += " LIMIT " + str(limit)
+        base_query += " LIMIT 10"
 
     try:
         with get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(base_query, params)
                 rows = cur.fetchall()
-                logging.info(f"Fetched {len(rows)} investments" + (f" for place='{place}'" if place else ""))
+                logging.info(f"Fetched {len(rows)} investments" + (f" for place='{place}'" if place else "") + (f" and status='{funding_status}'" if funding_status else ""))
                 return rows
     except psycopg2.Error as e:
         logging.error(f"Error fetching investments: {e}")
@@ -141,7 +151,8 @@ def index():
 @app.route('/report')
 def report():
     place = request.args.get('place')
-    rows = fetch_investments(place)
+    funding_status = request.args.get('funding_status')
+    rows = fetch_investments(place, funding_status)
     xml = build_xml(rows)
     html = transform(xml, 'xslt/report.xslt')
     if html is None:
