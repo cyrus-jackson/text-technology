@@ -2,6 +2,8 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
   <xsl:output method="html" indent="yes" encoding="UTF-8"/>
 
+  <xsl:param name="current_funding_status" select="''"/>
+
   <xsl:template match="/">
     <html lang="en">
       <head>
@@ -22,13 +24,16 @@
                 var places = xml.getElementsByTagName('place');
                 var sidebar = document.getElementById('sidebar');
                 var params = new URLSearchParams(window.location.search);
-                var current = params.get('place') || '';
+                var currentPlace = params.get('place') || '';
+                var currentStatus = params.get('funding_status') || ''; // Get current funding_status from URL
+
                 var list = document.createElement('div');
                 list.className = 'list-group list-group-flush';
 
                 var allLink = document.createElement('a');
-                allLink.href = '/report';
-                allLink.className = 'list-group-item list-group-item-action' + (current === '' ? ' active' : '');
+                // Build the 'All' places link, preserving funding_status
+                allLink.href = '/report' + (currentStatus ? '?funding_status=' + encodeURIComponent(currentStatus) : '');
+                allLink.className = 'list-group-item list-group-item-action' + (currentPlace === '' ? ' active' : '');
                 allLink.textContent = 'All';
                 list.appendChild(allLink);
 
@@ -36,8 +41,13 @@
                   var p = places[i];
                   var name = p.textContent;
                   var link = document.createElement('a');
-                  link.href = '/report?place=' + encodeURIComponent(name);
-                  link.className = 'list-group-item list-group-item-action' + (name === current ? ' active' : '');
+                  // Build link for each place, preserving funding_status
+                  var href = '/report?place=' + encodeURIComponent(name);
+                  if (currentStatus) {
+                    href += '&funding_status=' + encodeURIComponent(currentStatus);
+                  }
+                  link.href = href;
+                  link.className = 'list-group-item list-group-item-action' + (name === currentPlace ? ' active' : '');
                   link.textContent = name;
                   list.appendChild(link);
                 }
@@ -46,22 +56,48 @@
             };
             sel.send();
           }
-          window.onload = loadPlaces;
+
+          // Function to apply server-side filter when status dropdown changes
+          function applyServerFilter() {
+            const selectElement = document.getElementById('statusFilter');
+            const selectedStatus = selectElement.value;
+
+            const params = new URLSearchParams(window.location.search);
+            const currentPlace = params.get('place'); // Get current place from URL
+
+            let newUrl = '/report';
+            const newParams = new URLSearchParams();
+
+            if (currentPlace) {
+              newParams.set('place', currentPlace);
+            }
+            if (selectedStatus) { // Only add funding_status if a specific status is selected (not 'All')
+              newParams.set('funding_status', selectedStatus);
+            }
+
+            if (newParams.toString()) {
+              newUrl += '?' + newParams.toString();
+            }
+
+            window.location.href = newUrl; // Redirect to the new URL
+          }
+
+          window.onload = loadPlaces; // Still call loadPlaces on load
         ]]></script>
       </head>
       <body>
-				<header class="py-3">
-					<div class="container d-flex justify-content-between align-items-center">
-						<div>
-							<h1 class="project-title mb-0">Germany Stats and Investments from News Articles</h1>
-							<div class="subtitle">Text Technology Coursework</div>
-						</div>
-						<div class="contributors d-flex">
-							<span>Cyrus Dhara</span>
-							<span>Dwarkesh Patel</span>
-						</div>
-					</div>
-				</header>
+        <header class="py-3">
+          <div class="container d-flex justify-content-between align-items-center">
+            <div>
+              <h1 class="project-title mb-0">Germany Stats and Investments from News Articles</h1>
+              <div class="subtitle">Text Technology Coursework</div>
+            </div>
+            <div class="contributors d-flex">
+              <span>Cyrus Dhara</span>
+              <span>Dwarkesh Patel</span>
+            </div>
+          </div>
+        </header>
         <div class="container-fluid">
           <div class="row">
             <nav id="sidebar" class="col-md-3 col-lg-2">
@@ -98,25 +134,39 @@
 
               <div class="mt-3 mb-4">
                 <label for="statusFilter" class="form-label fw-semibold">Filter by Status:</label>
-                <select id="statusFilter" class="form-select w-auto d-inline-block">
+                <select id="statusFilter" class="form-select w-auto d-inline-block" onchange="applyServerFilter()">
                   <option value="">All</option>
-                  <option value="Allocated">Allocated</option>
-                  <option value="Planned">Planned</option>
-                  <option value="Potential">Potential</option>
+                  <option value="Allocated">
+                    <xsl:if test="$current_funding_status = 'Allocated'">selected</xsl:if>
+                    Allocated
+                  </option>
+                  <option value="Planned">
+                    <xsl:if test="$current_funding_status = 'Planned'">selected</xsl:if>
+                    Planned
+                  </option>
+                  <option value="Potential">
+                    <xsl:if test="$current_funding_status = 'Potential'">selected</xsl:if>
+                    Potential
+                  </option>
                 </select>
               </div>
 
               <div class="list-group">
                 <xsl:for-each select="investments/investment">
-                  <div class="list-group-item list-group-item-action py-3 mb-2 rounded-3 shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                  <div class="list-group-item list-group-item-action py-3 mb-3 rounded-3 shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
                     <div class="flex-grow-1 me-md-3 mb-2 mb-md-0">
-                      <h5 class="mb-1 fw-bold text-primary">
+                      <h5 class="mb-1 fw-bold text-dark">
                         <xsl:value-of select="summary"/>
                       </h5>
                       <small class="text-muted d-block mb-2">
                         Date: <xsl:value-of select="news_article_date"/>
-                        <xsl:if test="place"> | Place: <xsl:value-of select="place"/></xsl:if>
                       </small>
+                      <xsl:if test="place">
+                          <div class="d-flex align-items-center text-muted mb-2">
+                              <i class="fas fa-map-marker-alt me-1"></i>
+                              <span><xsl:value-of select="place"/></span>
+                          </div>
+                      </xsl:if>
                       <div class="d-flex flex-wrap gap-3 mt-2 text-sm">
                         <div class="d-flex align-items-center">
                             <xsl:choose>
@@ -129,8 +179,8 @@
                                 </xsl:when>
                                 <xsl:otherwise>
                                     <span class="text-muted fst-italic">Amount: Not Specified</span>
-                                </xsl:otherwise>
-                            </xsl:choose>
+                                    </xsl:otherwise>
+                                </xsl:choose>
                         </div>
                         <div class="d-flex align-items-center">
                             <xsl:choose>
@@ -172,16 +222,6 @@
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-          document.getElementById('statusFilter').addEventListener('change', function () {
-            const selected = this.value.toLowerCase();
-            document.querySelectorAll('.list-group-item').forEach(item => {
-              const statusEl = item.querySelector('.badge');
-              const status = statusEl ? statusEl.textContent.toLowerCase().trim() : '';
-              item.style.display = (!selected || status.includes(selected)) ? '' : 'none';
-            });
-          });
-        </script>
       </body>
     </html>
   </xsl:template>
