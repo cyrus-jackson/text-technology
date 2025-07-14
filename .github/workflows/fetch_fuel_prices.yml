@@ -3,7 +3,7 @@ name: Fetch Fuel Prices
 on:
   workflow_dispatch:
   schedule:
-    # Every day at 6:00 UTC
+    # Every day at 14:00 UTC
     - cron:  '0 14 * * *'
 
 jobs:
