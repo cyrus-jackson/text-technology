@@ -49,8 +49,8 @@ def get_news_org_urls():
 
 def get_mediastack_urls(keywords='', countries='de', sort='published_asc', limit=100):
     base_url = "http://api.mediastack.com/v1/news"
-    offset = 8900
-    max = 9400
+    offset = 9700
+    max = 10000
     urls = []
 
     while True:
