@@ -9,7 +9,7 @@ SERVER_HOST = '127.0.0.1'
 SERVER_PORT = 8008
 SERVER_URL = f"http://{SERVER_HOST}:{SERVER_PORT}/"
 
-RUN_SERVER_SCRIPT = './run_server.py'
+RUN_SERVER_SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'run_server.py')
 
 def run_job():
     server_process = None
@@ -21,7 +21,7 @@ def run_job():
                                           stderr=subprocess.PIPE,
                                           text=True)
 
-
+        # Give the server a moment to start up
         time.sleep(5)
 
         print(f"Making GET request to {SERVER_URL}")
