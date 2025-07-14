@@ -1,0 +1,128 @@
+body {
+    background-color: #f8f9fa;
+}
+#sidebar {
+    max-height: 100vh;
+    overflow-y: auto;
+    background-color: #fff;
+    padding-top: 1rem;
+    border-right: 1px solid #dee2e6;
+}
+#sidebar .list-group-item:hover {
+    background-color: #f1f1f1;
+}
+.report-section {
+    padding: 1rem 0;
+    border-bottom: 1px solid #dee2e6;
+}
+.report-heading {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #0d6efd;
+    text-decoration: none;
+}
+.report-subtitle {
+    font-size: 0.95rem;
+    color: #6c757d;
+    margin-bottom: 0.75rem;
+}
+header {
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-bottom: 2px solid #dee2e6;
+}
+.project-title {
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: #000;
+    margin-bottom: 0.2rem;
+}
+.subtitle {
+    font-size: 0.95rem;
+    color: #6c757d;
+}
+.contributors span {
+    background-color: #e6e6e6;
+    color: #000;
+    padding: 0.35rem 0.75rem;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+    user-select: none;
+    transition: background-color 0.3s;
+    cursor: default;
+}
+.contributors span:first-child {
+    margin-left: 0;
+}
+.contributors span:hover {
+    background-color: #d4d4d4;
+}
+
+/* Modern Card Styles */
+.modern-card {
+    transition:
+        transform 0.2s ease-in-out,
+        box-shadow 0.2s ease-in-out;
+}
+
+.modern-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.card-title {
+    font-size: 1.25rem;
+}
+
+.text-sm {
+    font-size: 0.875em;
+}
+
+.text-secondary {
+    color: #6c757d;
+    line-height: 1.6;
+}
+
+.badge.rounded-pill {
+    padding-top: 0.4em;
+    padding-bottom: 0.4em;
+}
+
+.investment-stats {
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    padding: 1rem 0;
+    margin-bottom: 1.5rem !important;
+}
+
+.stat-item {
+    flex-basis: 48%;
+}
+
+.stat-item strong {
+    font-size: 1.25rem;
+    color: #343a40;
+}
+
+.stat-item small {
+    display: block;
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 0.2rem;
+}
+
+/* Icons styling */
+.stat-item .fas {
+    font-size: 1rem;
+    vertical-align: middle;
+}
+
+.icon-euro-dark {
+    color: #28a745;
+}
+
+.icon-jobs-dark {
+    color: #007bff;
+}
