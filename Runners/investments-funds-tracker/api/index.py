@@ -43,7 +43,7 @@ class handler(BaseHTTPRequestHandler):
 
         try:
             count = 0
-            COUNT_TO_EXIT = 1000
+            COUNT_TO_EXIT = 10
             all_data = []
             news_urls = []
             error_links = []

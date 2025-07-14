@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 newsapi = NewsApiClient(api_key=NEWS_KEY)
 
 def get_today_news_urls():
-    urls = get_mediastack_urls()
+    urls = get_news_org_urls()
     print(urls)
     return urls
 
@@ -49,8 +49,8 @@ def get_news_org_urls():
 
 def get_mediastack_urls(keywords='', countries='de', sort='published_asc', limit=100):
     base_url = "http://api.mediastack.com/v1/news"
-    offset = 9700
-    max = 10000
+    offset = 0
+    max = 100
     urls = []
 
     while True:

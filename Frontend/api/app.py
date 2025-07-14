@@ -28,18 +28,18 @@ def get_connection():
 creds_dict = json.loads(base64.b64decode(FIREBASE_CRED))
 
 # Fetch investments
-def fetch_investments(place=None):
+def fetch_investments(place=None, limit=None):
     base_query = (
-        "SELECT link, place, news_article_date, amount, jobs_count, "
-        "funding_related, funding_status, notes, "
-        "needs_verification, summary, inserted_date, verified "
+        "SELECT * "
         "FROM investments"
     )
     params = []
     if place:
         base_query += " WHERE place = %s"
         params.append(place)
-    base_query += " ORDER BY inserted_date DESC"
+    base_query += " ORDER BY news_article_date DESC"
+    if limit:
+        base_query += " LIMIT " + str(limit)
 
     try:
         with get_connection() as conn:
@@ -116,7 +116,7 @@ def index():
     if combined:
         logging.info("Using cached HTML")
     else:
-        rows = fetch_investments()
+        rows = fetch_investments(limit = 12)
         xml = build_xml(rows)
         html = transform(xml, 'xslt/index.xslt')
         firestore_xml = build_firestore_xml()
